@@ -1,10 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "adept.h"
 #include "rosenbrock.h"
 
 using namespace std;
-using namespace adept;
 
 
 int main(int argc, const char *argv[]) {

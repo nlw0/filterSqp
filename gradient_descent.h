@@ -5,8 +5,10 @@
 #ifndef FILTERSQP_GRADIENT_DESCENT_H
 #define FILTERSQP_GRADIENT_DESCENT_H
 
-double * gradient_descent(void (*function) (double*, double*, double*), int dim, double xx0[], double step_size);
+#include <gsl/gsl_linalg.h>
 
+double *gradient_descent(void (*function)(double *, double *, double *), int dim, double xx0[],
+                         double step_size=0.001, double steplimit = 1e-10, int max_iterations = 10000);
 
 gsl_vector *rec_gradient_descent(void (*function)(double *, double *, double *),
                                  gsl_vector *xx,
