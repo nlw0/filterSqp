@@ -1,2 +1,3 @@
 # filterSqp
-Implementation of the FilterSQP constained optimization algorithm. Using the Adept library for automatic differentiation.
+Implementation of the FilterSQP constrained optimization algorithm. Using the FADBAD++ library for automatic 
+differentiation.
