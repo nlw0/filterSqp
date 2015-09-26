@@ -19,8 +19,8 @@ double *gradient_descent(void (*function)(double *, double *, double *), int dim
 
     gsl_vector *sol = rec_gradient_descent(function, xx, gradV, 0, step_size, steplimit, max_iterations);
 
-    gsl_vector_free(gradV);
     //gsl_vector_free(xx);
+    gsl_vector_free(gradV);
 
     return sol->data;
 }

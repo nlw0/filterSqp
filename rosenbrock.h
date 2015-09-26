@@ -8,6 +8,7 @@ using namespace fadbad;
 
 F<double> sq(const F<double> &x);
 F<double> rosenbrock_function(F<double> x[2]);
-void target_rosenbrock(double x_val[2], double y_val[1], double dy_dx[2]);
+void target_rosenbrock_grad(double *x_val, double *y_val, double *dy_dx);
+void target_rosenbrock_hess(double *x_val, double *y_val, double *gradient, double *hessian);
 
 #endif //FILTERSQP_ROSENBROCK_H

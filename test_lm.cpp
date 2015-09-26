@@ -3,7 +3,7 @@
 #include <iomanip>
 #include "rosenbrock.h"
 
-#include "gradient_descent.h"
+#include "lm_optim.h"
 
 using namespace std;
 
@@ -17,7 +17,7 @@ int main(int argc, const char *argv[]) {
     // Read initial position.
     fs >> xx[0] >> xx[1];
 
-    double *dd = gradient_descent(target_rosenbrock_grad, 2, xx);
+    double *dd = levenberg_marquadt(target_rosenbrock_hess, 2, xx, 0.1);
 
     // Output solution
     cout << "sol:" << dd[0] << " " << dd[1];
