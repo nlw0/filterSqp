@@ -10,11 +10,11 @@ target_link_libraries(testAd)
 add_executable(test_gsl test_gsl.cpp)
 target_link_libraries(test_gsl gsl blas)
 
-set(GD_SOURCE_FILES test_gd.cpp gradient_descent.cpp rosenbrock.cpp gradient_descent.h lm_optim.h.h)
+set(GD_SOURCE_FILES test_gd.cpp gradient_descent.cpp rosenbrock.cpp gradient_descent.h lm_optim.h)
 add_executable(testGd ${GD_SOURCE_FILES})
 target_link_libraries(testGd gsl blas)
 
-set(LM_SOURCE_FILES test_lm.cpp lm_optim.cpp rosenbrock.cpp lm_optim.h)
+set(LM_SOURCE_FILES test_lm.cpp lm_optim.cpp rosenbrock.cpp himmelblau.cpp lm_optim.h find_root.cpp himmelblau.h)
 add_executable(testLm ${LM_SOURCE_FILES})
 target_link_libraries(testLm gsl blas)
 
@@ -24,3 +24,7 @@ add_executable(testFadbad ${FB_SOURCE_FILES})
 
 set(TR_SOURCE_FILES test_findroot.cpp find_root.cpp)
 add_executable(testFindroot ${TR_SOURCE_FILES})
+
+set(LMPATO_SOURCE_FILES test_lm_pato.cpp lm_optim.cpp find_root.cpp)
+add_executable(testLmPato ${LMPATO_SOURCE_FILES})
+target_link_libraries(testLmPato gsl blas)

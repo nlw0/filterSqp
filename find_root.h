@@ -17,11 +17,11 @@
 using namespace std;
 using namespace experimental;
 
-optional<double> find_root(int dim, double *alpha, double *lam, double rho, double rho_tol);
+optional<double> find_root(int dim, double *alpha, double *lam, double rho, double rho_tol=1e-5);
 
 optional<double> rec_find_root(int dim, double *alpha, double *lam, double rho, double rho_tol,
                                double nu_min, double nu_a, double nu_b, double f_a, double f_b, int ki = 0);
 
-double calculate_length(int dim, const double *alpha, const double *lam, double rho, double nu);
+double calculate_length(int dim, const double *alpha, const double *lam, double nu);
 
 #endif //FILTERSQP_FIND_ROOT_H

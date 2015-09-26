@@ -1,7 +1,6 @@
 #ifndef FILTERSQP_ROSENBROCK_H
 #define FILTERSQP_ROSENBROCK_H
 
-#include "rosenbrock.h"
 #include "fadbad/badiff.h"
 #include "fadbad/fadiff.h"
 using namespace fadbad;

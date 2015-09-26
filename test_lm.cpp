@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "rosenbrock.h"
+#include "himmelblau.h"
 
 #include "lm_optim.h"
 
@@ -17,10 +18,9 @@ int main(int argc, const char *argv[]) {
     // Read initial position.
     fs >> xx[0] >> xx[1];
 
-    double *dd = levenberg_marquadt(target_rosenbrock_hess, 2, xx, 0.1);
+    // levenberg_marquadt(target_rosenbrock_hess, 2, xx, 0.1);
 
-    // Output solution
-    cout << "sol:" << dd[0] << " " << dd[1];
+    levenberg_marquadt(target_himmelblau_hess, 2, xx, 1.0);
 
     return 0;
 }
