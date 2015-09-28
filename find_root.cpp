@@ -32,9 +32,9 @@ optional<double> rec_find_root(int dim, double *alpha, double *lam, double rho, 
 
     double nu_new, f_new;
 
-    // cout << "xx " << ki << "\t" << nu_a << "\t" << nu_b << "\t" << f_a << "\t" << f_b << endl;
+//    cout << " xx " << ki << "\t" << rho << "\t" << nu_min << "\t" << nu_a << "\t" << nu_b << "\t" << f_a << "\t" << f_b << endl;
 
-    if (ki >= MAX_ITERATIONS || isinf(f_a) || isinf(f_b)) return nullopt;
+    if (ki >= (MAX_ITERATIONS - 1) || isinf(f_a) || isinf(f_b)) return nullopt;
     else if (f_a >= 0 && f_b <= 0) {
 
         double nu_secant = nu_b - f_b * (nu_b - nu_a) / (f_b - f_a);
@@ -68,9 +68,9 @@ optional<double> rec_find_root(int dim, double *alpha, double *lam, double rho, 
 // Calculates a step size for different nu values.
 double calculate_length(int dim, const double *alpha, const double *lam, double nu) {
     double output = 0.0;
-    int i;
-    double y = 0;
 
+    double y = 0.0;
+    int i;
     for (i = 0; i < dim; ++i) {
         y = alpha[i] / (lam[i] + nu);
         output += y * y;

@@ -20,7 +20,7 @@ int main(int argc, const char *argv[]) {
 
     // levenberg_marquadt(target_rosenbrock_hess, 2, xx, 0.1);
 
-    levenberg_marquadt(target_himmelblau_hess, 2, xx, 1.0);
+    levenberg_marquadt(target_himmelblau_hess, 2, xx, 0.25, 1e-7);
 
     return 0;
 }
