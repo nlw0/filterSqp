@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "lm_optim.h"
+#include "tr_optim.h"
 
 using namespace std;
 
@@ -62,7 +62,7 @@ int main(int argc, const char *argv[]) {
     double rho = 0.0;
     double rho_incr = 0.05;
     for (rho = rho_incr; rho < 2.1; rho += rho_incr)
-        levenberg_marquadt(saddle_function, 2, xx, rho, 1e-5, 1);
-//        levenberg_marquadt(biggie_function, 4, xx, rho, 1e-5, 1);
+        trust_region_optimization(saddle_function, 2, xx, rho, 1e-5, 1);
+//        trust_region_optimization(biggie_function, 4, xx, rho, 1e-5, 1);
     return 0;
 }

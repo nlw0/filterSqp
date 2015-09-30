@@ -1,10 +1,10 @@
 #include <gsl/gsl_vector_double.h>
-#include "lm_optim.h"
+#include "tr_optim.h"
 
 using namespace std;
 
-double *levenberg_marquadt(void (*function)(double *, double *, double *, double *), int dim, double xx0[],
-                           double step_size, double step_limit, int max_iterations) {
+double *trust_region_optimization(void (*function)(double *, double *, double *, double *), int dim, double *xx0,
+                                  double step_size, double step_limit, int max_iterations) {
     cout << setprecision(15);
 
     gsl_vector *xx = gsl_vector_alloc((const size_t) dim);
@@ -16,7 +16,7 @@ double *levenberg_marquadt(void (*function)(double *, double *, double *, double
     gsl_vector_view xx0V = gsl_vector_view_array(xx0, (size_t) dim);
     gsl_vector_memcpy(xx, &xx0V.vector);
 
-    rec_levenberg_marquadt(function, xx, grad, hess, xxStep, 0, step_size, step_limit, max_iterations);
+    rec_trust_region_optimization(function, xx, grad, hess, xxStep, 0, step_size, step_limit, max_iterations);
 
     gsl_vector_free(grad);
     gsl_matrix_free(hess);
@@ -33,8 +33,7 @@ bool vector_too_small(gsl_vector *vec, double tol = 1e-7) {
 
 bool hard_case(gsl_vector *vec, gsl_vector *lam, double tol = 1e-7) {
     double lambda_one = gsl_vector_min(lam);
-    if (lambda_one <= 0)
-    {
+    if (lambda_one <= 0) {
         int i;
         for (i = 0; i < vec->size; i++) if (fabs(vec->data[i]) < tol && lam->data[i] == lambda_one) return true;
     }
@@ -106,24 +105,26 @@ void find_step(gsl_vector *grad,
     gsl_matrix_free(evec);
 }
 
-gsl_vector *rec_levenberg_marquadt(void (*function)(double *, double *, double *, double *),
-                                   gsl_vector *xx,
-                                   gsl_vector *grad,
-                                   gsl_matrix *hess,
+gsl_vector *rec_trust_region_optimization(
+        void (*function)(double *, double *, double *, double *),
+        gsl_vector *xx,
+        gsl_vector *grad,
+        gsl_matrix *hess,
 
-                                   gsl_vector *xxStep,
+        gsl_vector *xxStep,
 
-                                   int iteration,
-                                   double step_size, double step_limit, int max_iterations) {
+        int iteration,
+        double step_size, double step_limit, int max_iterations) {
 
+    int i;
     double yy;
     function(xx->data, &yy, grad->data, hess->data);
 
     find_step(grad, hess, xxStep, step_size);
     gsl_vector_scale(xxStep, -1.0);
 
-    cout << iteration << "\t" << xx->data[0] << "\t" << xx->data[1] << "\t" << yy;
-    int i;
+    cout << iteration << "\t" << yy;
+    for (i = 0; i < xx->size; i++) cout << "\t" << xx->data[i];
     for (i = 0; i < xxStep->size; i++) cout << "\t" << xxStep->data[i];
     cout << endl;
 
@@ -136,6 +137,6 @@ gsl_vector *rec_levenberg_marquadt(void (*function)(double *, double *, double *
     if (stop_criterion)
         return xx;
     else
-        return rec_levenberg_marquadt(function, xx, grad, hess, xxStep, iteration + 1, step_size,
-                                      step_limit, max_iterations);
+        return rec_trust_region_optimization(function, xx, grad, hess, xxStep, iteration + 1, step_size,
+                                             step_limit, max_iterations);
 }
