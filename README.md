@@ -2,7 +2,7 @@
 Implementation of the FilterSQP constrained optimization algorithm. Using the FADBAD++ library for automatic 
 differentiation.
 
-2015/Sep - This is still very much WIP, and there is nothing related to constrained optimization yet. Just implementing trust-region optimization first, adapting my old Python code from the [Cosisco project](https://github.com/nlw0/corisco).
+2015/Sep - This is still very much WIP, and there is nothing related to constrained optimization yet. Just implementing trust-region optimization first, adapting my old Python code from the [Corisco project](https://github.com/nlw0/corisco).
 
 But we do have preliminary results. Here are some basic demos of the solution of classic functions.
 
