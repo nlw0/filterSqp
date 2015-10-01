@@ -16,17 +16,17 @@
 
 double *trust_region_optimization(void (*function)(double *, double *, double *, double *), int dim, double *xx0,
                                   double step_size = 0.001, double step_limit = 1e-10, int max_iterations = 10000);
-void find_step(gsl_vector *grad,
-               gsl_matrix *hess,
-               gsl_vector *xxStep,
-               double rho);
 
 gsl_vector *rec_trust_region_optimization(void (*function)(double *, double *, double *, double *),
                                           gsl_vector *xx,
+                                          gsl_vector *yy,
                                           gsl_vector *grad,
                                           gsl_matrix *hess,
-                                          gsl_vector *xxStep,
                                           int iteration,
                                           double step_size, double step_limit, int max_iterations);
+
+void trust_region_step(gsl_vector *grad, gsl_matrix *hess, gsl_vector *xxStep, double rho);
+
+ostream & operator<<(ostream& os, const gsl_vector *vec);
 
 #endif //FILTERSQP_LM_OPTIM_H

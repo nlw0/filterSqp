@@ -3,26 +3,81 @@
 
 using namespace std;
 
+
 double *trust_region_optimization(void (*function)(double *, double *, double *, double *), int dim, double *xx0,
                                   double step_size, double step_limit, int max_iterations) {
     cout << setprecision(15);
 
     gsl_vector *xx = gsl_vector_alloc((const size_t) dim);
+    gsl_vector *yy = gsl_vector_alloc((const size_t) 1);
     gsl_vector *grad = gsl_vector_alloc((const size_t) dim);
     gsl_matrix *hess = gsl_matrix_alloc((const size_t) dim, (const size_t) dim);
 
-    gsl_vector *xxStep = gsl_vector_alloc((const size_t) dim);
 
     gsl_vector_view xx0V = gsl_vector_view_array(xx0, (size_t) dim);
     gsl_vector_memcpy(xx, &xx0V.vector);
 
-    rec_trust_region_optimization(function, xx, grad, hess, xxStep, 0, step_size, step_limit, max_iterations);
+    function(xx->data, yy->data, grad->data, hess->data);
+    gsl_vector *result = rec_trust_region_optimization(function, xx, yy, grad, hess, 0, step_size, step_limit,
+                                                       max_iterations);
 
-    gsl_vector_free(grad);
-    gsl_matrix_free(hess);
-    gsl_vector_free(xxStep);
+    return result->data;
+}
 
-    return xx->data;
+gsl_vector *rec_trust_region_optimization(
+        void (*function)(double *, double *, double *, double *),
+        gsl_vector *xx,
+        gsl_vector *yy,
+        gsl_vector *grad,
+        gsl_matrix *hess,
+        int iteration,
+        double step_size, double step_limit, int max_iterations) {
+
+    int i;
+
+    gsl_vector *xxNew = gsl_vector_alloc(xx->size);
+
+    trust_region_step(grad, hess, xxNew, step_size);
+    gsl_vector_scale(xxNew, -1.0);
+
+    double cc = max(gsl_vector_max(xxNew), -gsl_vector_min(xxNew));
+
+    bool stop_criterion = iteration >= (max_iterations - 1) || cc < step_limit;
+
+    gsl_vector_add(xxNew, xx);
+
+    if (stop_criterion) {
+        cout << iteration << "\t" << yy << "\t" << xx << "\t" << xxNew << endl;
+        return xxNew;
+
+    } else {
+        gsl_vector *yyNew = gsl_vector_alloc(1);
+        gsl_vector *gradNew = gsl_vector_alloc(xx->size);
+        gsl_matrix *hessNew = gsl_matrix_alloc(xx->size, xx->size);
+        function(xxNew->data, yyNew->data, gradNew->data, hessNew->data);
+
+        // Test if predicted function value is close enough to yyNew. Reduce step size if not.
+        bool approximation_was_good = false;
+        if (approximation_was_good) {
+            gsl_vector_free(xxNew);
+            gsl_vector_free(yyNew);
+            gsl_vector_free(gradNew);
+            gsl_matrix_free(hessNew);
+            double step_size_new = step_size / 2.0;
+            return rec_trust_region_optimization(function, xx, yy, grad, hess, iteration, step_size_new,
+                                                 step_limit, max_iterations);
+        } else {
+            cout << iteration << "\t" << yy << "\t" << xx << "\t" << xxNew << endl;
+            gsl_vector_free(xx);
+            gsl_vector_free(yy);
+            gsl_vector_free(grad);
+            gsl_matrix_free(hess);
+            return rec_trust_region_optimization(function, xxNew, yyNew, gradNew, hessNew, iteration + 1, step_size,
+                                                 step_limit, max_iterations);
+        }
+
+    }
+
 }
 
 bool vector_too_small(gsl_vector *vec, double tol = 1e-7) {
@@ -40,10 +95,10 @@ bool hard_case(gsl_vector *vec, gsl_vector *lam, double tol = 1e-7) {
     return false;
 }
 
-void find_step(gsl_vector *grad,
-               gsl_matrix *hess,
-               gsl_vector *xxStep,
-               double rho) {
+void trust_region_step(gsl_vector *grad,
+                       gsl_matrix *hess,
+                       gsl_vector *xxStep,
+                       double rho) {
 
     const size_t dim = hess->size1;
 
@@ -105,38 +160,10 @@ void find_step(gsl_vector *grad,
     gsl_matrix_free(evec);
 }
 
-gsl_vector *rec_trust_region_optimization(
-        void (*function)(double *, double *, double *, double *),
-        gsl_vector *xx,
-        gsl_vector *grad,
-        gsl_matrix *hess,
-
-        gsl_vector *xxStep,
-
-        int iteration,
-        double step_size, double step_limit, int max_iterations) {
-
+ostream &operator<<(ostream &os, const gsl_vector *vec) {
     int i;
-    double yy;
-    function(xx->data, &yy, grad->data, hess->data);
-
-    find_step(grad, hess, xxStep, step_size);
-    gsl_vector_scale(xxStep, -1.0);
-
-    cout << iteration << "\t" << yy;
-    for (i = 0; i < xx->size; i++) cout << "\t" << xx->data[i];
-    for (i = 0; i < xxStep->size; i++) cout << "\t" << xxStep->data[i];
-    cout << endl;
-
-    gsl_vector_add(xx, xxStep);
-
-    double cc = max(gsl_vector_max(xxStep), -gsl_vector_min(xxStep));
-
-    bool stop_criterion = iteration >= (max_iterations - 1) || cc < step_limit;
-
-    if (stop_criterion)
-        return xx;
-    else
-        return rec_trust_region_optimization(function, xx, grad, hess, xxStep, iteration + 1, step_size,
-                                             step_limit, max_iterations);
+    cout << vec->data[0];
+    for (i = 1; i < vec->size; i++) cout << "\t" << vec->data[i];
+    return os;
 }
+
