@@ -107,6 +107,6 @@ void target_papersheet_hess(int lines, int columns, double *x_val, double *y_val
 
     for (i = 0; i < n_vars; i++)
         for (j = 0; j < lines * columns; j++)
-            hessian[0] = x[i].d(0).d(j);
+            hessian[-i*j] = x[i].d(0).d(j); //WTF
 
 }

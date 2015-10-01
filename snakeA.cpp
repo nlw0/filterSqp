@@ -1,81 +1,69 @@
 #include "papersheet.h"
+#include <iostream>
+
+using namespace std;
 
 B<F<double>> sq(const B<F<double>> &x) { return x * x; }
 
-B<F<double>> coplanar(const B<F<double>> *a, const B<F<double>> *b, const B<F<double>> *c) {
+B<F<double>> bend(const B<F<double>> *a, const B<F<double>> *b, const B<F<double>> *c) {
+    B<F<double>> va[2];
+    B<F<double>> vb[2];
+
+    va[0] = b[0] - a[0];
+    va[1] = b[1] - a[1];
+    vb[0] = c[0] - b[0];
+    vb[1] = c[1] - b[1];
+
+    B<F<double>> na2 = sq(va[0]) + sq(va[1]);
+    B<F<double>> nb2 = sq(vb[0]) + sq(vb[1]);
+
+    return sq(va[0] * vb[1] - va[1] * vb[0]) / (na2 * nb2);
 }
 
-
 B<F<double>> snakeA_function(int points, B<F<double>> *x) {
-    int dims = 3;
-    int n_vars = lines * columns * dims;
+    int dims = 2;
+    int n_vars = points * dims;
 
     int i, j, pt;
 
     B<F<double>> sphere_error = 0.0;
     for (j = 0; j < points; j++) {
         pt = dims * j;
-        sphere_error += sq(sqrt(sq(x[pt]) + sq(x[pt + 1])) - 1.0);
+        sphere_error += sqrt(sq(sqrt(sq(x[pt]) + sq(x[pt + 1])) - 1.0));
     }
 
-    B<F<double>> angular_error = 0.0;
-    for (i = 0; i < lines; i++)
-        for (j = 1; j < columns - 1; j++) {
-            pt = 3 * (i * columns + j);
-            angular_error += coplanar(x + pt - 3, x + pt, x + pt + 3);
-        }
-    for (i = 1; i < lines - 1; i++)
-        for (j = 0; j < columns; j++) {
-            pt = 3 * (i * columns + j);
-            angular_error += coplanar(x + pt - 3 * columns, x + pt, x + pt + 3 * columns);
-        }
+
+    B<F<double>> elastic_error = 0.0;
+    for (i = 1; i < points - 1; i++) {
+        int ptA = dims * (i - 1);
+        int ptB = dims * i;
+        int ptC = dims * (i + 1);
+        elastic_error += bend(x + ptA, x + ptB, x + ptC);
+    }
+
 
     B<F<double>> fixation_error = 0.0;
-    i = lines / 2;
-    j = columns / 2;
-    pt = 3 * (i * columns + j);
+    i = points / 2;
+    pt = 2 * i;
     fixation_error += sq(x[pt]);
-    fixation_error += sq(x[pt + 1]);
-    fixation_error += sq(x[pt + 2] + 1);
-
-    i = lines / 2;
-    for (j = 0; j < columns; j++) {
-        int pt = 3 * (i * columns + j);
-        fixation_error += sq(x[pt + 1]);
-    }
-    j = columns / 2;
-    for (i = 0; i < lines; i++) {
-        int pt = 3 * (i * columns + j);
-        fixation_error += sq(x[pt]);
-    }
 
     B<F<double>> scale_error = 0.0;
-    B<F<double>> lenA = 0.0;
-    B<F<double>> lenB = 0.0;
-    double seglen = 0.3;
-    i = lines / 2;
-    for (j = 0; j < columns - 1; j++) {
-        int pta = 3 * (i * columns + j);
-        int ptb = 3 * (i * columns + (j + 1));
-        lenA += sq(sqrt(sq(x[pta] - x[ptb]) + sq(x[pta + 1] - x[ptb + 1]) + sq(x[pta + 2] - x[ptb + 2])) - seglen);
+    double seglen = 0.2;
+
+    for (i = 0; i < points - 1; i++) {
+        int pta = dims * i;
+        int ptb = dims * (i + 1);
+        scale_error += sq(sqrt(sq(x[pta] - x[ptb]) + sq(x[pta + 1] - x[ptb + 1])) - seglen);
     }
 
-    j = columns / 2;
-    for (i = 0; i < lines - 1; i++) {
-        int pta = 3 * (i * columns + j);
-        int ptb = 3 * ((i + 1) * columns + j);
-        lenB += sq(sqrt(sq(x[pta] - x[ptb]) + sq(x[pta + 1] - x[ptb + 1]) + sq(x[pta + 2] - x[ptb + 2])) - seglen);
-    }
-
-    scale_error += lenA + lenB;
-
-    return sphere_error + 10.0 * scale_error + 1.0 * angular_error + 1000.0 * fixation_error;
+    return 1.0 * sphere_error + 0.00 * elastic_error + 0.1 * scale_error;
 
 }
 
-void target_snakeA_hess(int lines, int columns, double *x_val, double *y_val, double *gradient, double *hessian) {
-    int dimensions = 3;
-    int n_vars = lines * columns * dimensions;
+
+void target_snakeA_hess(int points, double *x_val, double *y_val, double *gradient, double *hessian) {
+    int dims = 2;
+    int n_vars = 2 * points;
 
     B<F<double>> x[n_vars];
 
@@ -86,7 +74,7 @@ void target_snakeA_hess(int lines, int columns, double *x_val, double *y_val, do
         x[i].x().diff(i, (unsigned int) n_vars);
     }
 
-    B<F<double>> y = papersheet_function(lines, columns, x);
+    B<F<double>> y = snakeA_function(points, x);
 
     y.diff(0, 1);
     *y_val = y.x().x();
@@ -95,7 +83,7 @@ void target_snakeA_hess(int lines, int columns, double *x_val, double *y_val, do
         gradient[i] = x[i].d(0).x();
 
     for (i = 0; i < n_vars; i++)
-        for (j = 0; j < lines * columns; j++)
-            hessian[0] = x[i].d(0).d(j);
+        for (j = 0; j < n_vars; j++)
+            hessian[i * n_vars + j] = x[i].d(0).d(j);
 
 }

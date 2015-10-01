@@ -32,3 +32,7 @@ target_link_libraries(testLmPato gsl blas)
 set(PAPER_SOURCE_FILES test_paper.cpp papersheet.cpp tr_optim.cpp find_root.cpp)
 add_executable(testPaper ${PAPER_SOURCE_FILES})
 target_link_libraries(testPaper gsl blas)
+
+set(PAPER_SOURCE_FILES test_snakeA.cpp snakeA.cpp tr_optim.cpp find_root.cpp)
+add_executable(testSnakeA ${PAPER_SOURCE_FILES})
+target_link_libraries(testSnakeA gsl blas)
