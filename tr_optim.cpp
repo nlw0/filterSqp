@@ -36,12 +36,9 @@ gsl_vector *rec_trust_region_optimization(
     int i;
 
     gsl_vector *xxNew = gsl_vector_alloc(xx->size);
-
     trust_region_step(grad, hess, xxNew, step_size);
-    gsl_vector_scale(xxNew, -1.0);
 
     double cc = max(gsl_vector_max(xxNew), -gsl_vector_min(xxNew));
-
     bool stop_criterion = iteration >= (max_iterations - 1) || cc < step_limit;
 
     gsl_vector_add(xxNew, xx);
@@ -154,6 +151,8 @@ void trust_region_step(gsl_vector *grad,
         gsl_vector_free(alpha);
         gsl_vector_free(beta);
     }
+
+    gsl_vector_scale(xxStep, -1.0);
 
     gsl_eigen_symmv_free(w);
     gsl_vector_free(eval);
