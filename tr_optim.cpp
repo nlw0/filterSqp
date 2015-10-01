@@ -47,7 +47,7 @@ gsl_vector *rec_trust_region_optimization(
     gsl_vector_add(xxNew, xx);
 
     if (stop_criterion) {
-        cout << iteration << "\t" << yy << "\t" << xx << "\t" << xxNew << endl;
+        cout << iteration << "\t" << yy << "\t" << xxNew << endl;
         return xxNew;
 
     } else {
@@ -67,7 +67,7 @@ gsl_vector *rec_trust_region_optimization(
             return rec_trust_region_optimization(function, xx, yy, grad, hess, iteration, step_size_new,
                                                  step_limit, max_iterations);
         } else {
-            cout << iteration << "\t" << yy << "\t" << xx << "\t" << xxNew << endl;
+            cout << iteration << "\t" << yy << "\t" << xxNew << endl;
             gsl_vector_free(xx);
             gsl_vector_free(yy);
             gsl_vector_free(grad);
