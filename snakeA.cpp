@@ -5,21 +5,6 @@ using namespace std;
 
 B<F<double>> sq(const B<F<double>> &x) { return x * x; }
 
-B<F<double>> bend(const B<F<double>> *a, const B<F<double>> *b, const B<F<double>> *c) {
-    B<F<double>> va[2];
-    B<F<double>> vb[2];
-
-    va[0] = b[0] - a[0];
-    va[1] = b[1] - a[1];
-    vb[0] = c[0] - b[0];
-    vb[1] = c[1] - b[1];
-
-    B<F<double>> na2 = sq(va[0]) + sq(va[1]);
-    B<F<double>> nb2 = sq(vb[0]) + sq(vb[1]);
-
-    return sq(va[0] * vb[1] - va[1] * vb[0]) / (na2 * nb2);
-}
-
 B<F<double>> snakeA_function(int points, B<F<double>> *x) {
     int dims = 2;
     int n_vars = points * dims;
@@ -31,16 +16,6 @@ B<F<double>> snakeA_function(int points, B<F<double>> *x) {
         pt = dims * j;
         sphere_error += sqrt(sq(sqrt(sq(x[pt]) + sq(x[pt + 1])) - 1.0));
     }
-
-
-    B<F<double>> elastic_error = 0.0;
-    for (i = 1; i < points - 1; i++) {
-        int ptA = dims * (i - 1);
-        int ptB = dims * i;
-        int ptC = dims * (i + 1);
-        elastic_error += bend(x + ptA, x + ptB, x + ptC);
-    }
-
 
     B<F<double>> fixation_error = 0.0;
     i = points / 2;
@@ -56,7 +31,11 @@ B<F<double>> snakeA_function(int points, B<F<double>> *x) {
         scale_error += sq(sqrt(sq(x[pta] - x[ptb]) + sq(x[pta + 1] - x[ptb + 1])) - seglen);
     }
 
-    return 1.0 * sphere_error + 0.00 * elastic_error + 0.1 * scale_error;
+    pt = points / 2;
+    B<F<double>> fix_error = sq(x[dims * pt]);
+
+    // return 0.1 * sphere_error + 10.0 * scale_error + fix_error;
+    return 10.0 * sphere_error + 0.1 * scale_error + fix_error;
 
 }
 

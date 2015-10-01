@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
 
     my_target_snakeA_hess(xx, yy, gg, hh);
 
-    double *res = trust_region_optimization(my_target_snakeA_hess, n_vars, xx, 0.1, 1e-4, 50);
+    double *res = trust_region_optimization(my_target_snakeA_hess, n_vars, xx, 0.05, 1e-4, 10000);
 
     for (i = 0; i < points; i++) {
         int pt = 2 * i;
