@@ -22,6 +22,10 @@ gsl_vector *rec_trust_region_optimization(void (*function)(double *, double *, d
                                           gsl_vector *yy,
                                           gsl_vector *grad,
                                           gsl_matrix *hess,
+                                          gsl_vector *xx_hess,
+                                          gsl_vector *yy_hess,
+                                          gsl_vector *grad_hess,
+                                          gsl_matrix *hess_hess,
                                           int iteration,
                                           double step_size, double step_limit, int max_iterations);
 
