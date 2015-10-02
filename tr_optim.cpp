@@ -67,13 +67,15 @@ gsl_vector *rec_trust_region_optimization(
     bool stop_criterion = iteration >= (max_iterations - 1) || cc < step_limit;
 
     if (stop_criterion) {
+        double moved = gsl_blas_dnrm2(xx_new);
         gsl_vector_add(xx_new, xx);
-        cout << iteration << "\t" << step_size << "\t" << yy << "\t" << xx_new << endl;
+        cout << iteration << "\t" << step_size << "\t" << moved << "\t" << yy << "\t" << xx_new << endl;
         return xx_new;
 
     } else {
         double pred = quadratic_eval(hess, grad, xx_new);
-        double was_newton = gsl_blas_dnrm2(xx_new) < step_size;
+        double moved = gsl_blas_dnrm2(xx_new);
+        double was_newton = moved < step_size * 0.9;
 
         gsl_vector_add(xx_new, xx);
         function(xx_new->data, yy_new->data, grad_new->data, hess_new->data);
@@ -81,12 +83,12 @@ gsl_vector *rec_trust_region_optimization(
         double actual = yy_new->data[0] - yy->data[0];
 
         // Test if predicted function value is close enough to yyNew. Reduce step size if not.
-        bool approximation_was_good = actual < 0 && pred < 0 && pred / actual < 1.2;
+        bool approximation_was_good = actual < 0 && pred < actual * 0.8 && pred > actual * 1.2;
 
         if (approximation_was_good) {
-            cout << iteration << "\t" << step_size << "\t" << yy << "\t" << xx << endl;
+            cout << iteration << "\t" << step_size << "\t" << moved << "\t" << yy << "\t" << xx << endl;
 
-            double step_size_new = step_size * 1.5;
+            double step_size_new = was_newton ? step_size : step_size * 2.0;
             return rec_trust_region_optimization(function, xx_new, yy_new, grad_new, hess_new, xx, yy, grad, hess,
                                                  iteration + 1, step_size_new, step_limit, max_iterations);
         } else {
